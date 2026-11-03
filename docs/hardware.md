@@ -2,7 +2,7 @@
 
 | 项目 | 已确认 | 待确认 |
 |---|---|---|
-| 主控 | ESP32-S3-DevKitC-1，N16R8，16 MiB Flash，8 MiB PSRAM | 具体 GPIO 分配 |
+| 主控 | ESP32-S3-DevKitC-1 兼容板，N16R8，双 Type-C（COM + USB），板载 RGB | 见 devkit-pinout.md |
 | 测距 | RCWL-1605，引脚序 Vcc/Trig/Echo/GND 已从照片确认，见 rcwl1605.md | Trig/Echo 对应的 ESP32 引脚、M1/M2 焊盘状态、量程、刷新率 |
 | 振动 | 738 马达模块，MOS 管高电平触发，5V，PWM | 控制引脚 |
 | 语音 | 预录音模块，扬声器电池供电 | 模块型号、触发方式、GPIO |
