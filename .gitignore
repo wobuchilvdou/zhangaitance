@@ -1,0 +1,11 @@
+build/
+dist/
+__pycache__/
+*.pyc
+.venv/
+.env
+*.bin
+!docs/images/*.png
+!docs/images/*.jpg
+config/local/
+secrets/
