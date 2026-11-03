@@ -16,17 +16,20 @@ struct SensorReading {
     float distance_cm = 0.0F;
 };
 
-// 建议接线（待用户确认后写入正式配置）：
-// RCWL-1605 Trig -> GPIO4（输出）
-// RCWL-1605 Echo -> GPIO5（输入，5V 输出必须分压后接入）
-// 738 马达 PWM   -> GPIO6（经 MOS 管栅极）
-// 预录音语音触发 -> GPIO7（待模块型号确认）
+// 正式接线（采用此前原型验证过的接法，3.3V 供电无需分压）：
+// RCWL-1605 VCC -> 3V3
+// RCWL-1605 Trig -> GPIO5（输出）
+// RCWL-1605 Echo -> GPIO18（输入，模块 3.3V 供电时 Echo 为 3.3V 电平）
+// RCWL-1605 GND -> GND
+// 738 马达 IN -> GPIO4（输出，经 MOS 管栅极，高电平触发）
+// 738 马达 VCC -> 3V3（5V 针脚未供电；后续上电池再评估切 5V）
+// 预录音语音触发 -> GPIO6（待模块型号确认）
 
 struct PinConfig {
-    int trig_pin = 4;      // provisional: requires user confirmation
-    int echo_pin = 5;      // provisional: requires user confirmation
-    int motor_pwm_pin = 6; // provisional: requires user confirmation
-    int speech_trigger_pin = 7; // provisional: requires user confirmation
+    int trig_pin = 5;
+    int echo_pin = 18;
+    int motor_pwm_pin = 4;
+    int speech_trigger_pin = 6; // provisional: speech module model unconfirmed
 };
 
 // 纯逻辑函数，可在无硬件环境下编译并测试。
