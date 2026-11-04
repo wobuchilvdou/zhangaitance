@@ -20,9 +20,8 @@ constexpr uint32_t ECHO_TIMEOUT_US = 25000;  // ~4.3 m max
 constexpr uint32_t SAMPLE_MS = 100;
 constexpr uint8_t MEDIAN_N = 5;
 
-// Motor PWM (LEDC)
+// Motor PWM (LEDC). NOTE: Arduino-ESP32 core 3.x ledcWrite() takes PIN, not channel.
 constexpr uint32_t MOTOR_FREQ_HZ = 1000;
-constexpr uint8_t MOTOR_CH = 0;
 constexpr uint8_t MOTOR_RES_BITS = 8;
 constexpr uint8_t DUTY_OFF = 0;
 constexpr uint8_t DUTY_LOW = 100;    // ~39%
@@ -80,7 +79,7 @@ static void motor_apply(Level lv) {
     case LV_INFO: duty = DUTY_MED; break;
     default: duty = DUTY_OFF; break;
   }
-  ledcWrite(MOTOR_CH, duty);
+  ledcWrite(PIN_MOTOR, duty);
 }
 
 // CRITICAL uses interrupting bursts so it feels distinct from steady HIGH.
@@ -90,7 +89,7 @@ static void motor_update(uint32_t now, Level lv) {
       s_motor_window = now;
       s_motor_burst_on = !s_motor_burst_on;
     }
-    ledcWrite(MOTOR_CH, s_motor_burst_on ? DUTY_MAX : DUTY_OFF);
+    ledcWrite(PIN_MOTOR, s_motor_burst_on ? DUTY_MAX : DUTY_OFF);
   } else {
     s_motor_burst_on = true;
     motor_apply(lv);
@@ -127,7 +126,7 @@ void setup() {
   digitalWrite(PIN_SPEECH, LOW);
   // Arduino-ESP32 core 3.x replaced ledcSetup/ledcAttachPin with ledcAttach.
   ledcAttach(PIN_MOTOR, MOTOR_FREQ_HZ, MOTOR_RES_BITS);
-  ledcWrite(MOTOR_CH, DUTY_OFF);
+  ledcWrite(PIN_MOTOR, DUTY_OFF);
   Serial.println("blind_assist stage1 boot");
 }
 
