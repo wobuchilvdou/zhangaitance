@@ -19,6 +19,7 @@ constexpr float INFO_CM = 150.0f;    // INFO; beyond -> SAFE
 constexpr uint32_t ECHO_TIMEOUT_US = 25000;  // ~4.3 m max
 constexpr uint32_t SAMPLE_MS = 100;
 constexpr uint8_t MEDIAN_N = 5;
+constexpr uint8_t LEVEL_CONFIRM_N = 3;  // consecutive samples needed to switch levels
 
 // Motor PWM (LEDC). NOTE: Arduino-ESP32 core 3.x ledcWrite() takes PIN, not channel.
 constexpr uint32_t MOTOR_FREQ_HZ = 1000;
@@ -38,6 +39,8 @@ static bool     s_sensor_fault = false;
 static uint32_t s_last_fault_log = 0;
 static uint32_t s_motor_window = 0;
 static bool     s_motor_burst_on = true;
+static Level    s_pending_level = LV_SAFE;
+static uint8_t  s_pending_count = 0;
 
 static float read_distance_cm() {
   digitalWrite(PIN_TRIG, LOW);
@@ -156,14 +159,31 @@ void loop() {
   s_ridx = (s_ridx + 1) % MEDIAN_N;
   if (s_ridx == 0) s_buf_full = true;
 
-  float dist;
-  if (!median(dist)) return;
+  float dist = cm;
+  if (s_buf_full) {
+    if (!median(dist)) dist = cm;
+  }
   Level lv = classify(dist);
 
-  if (lv != last) {
-    Serial.printf("dist=%.1fcm level=%s\n", dist, level_name(lv));
-    speech_trigger(lv, false);
-    last = lv;
+  // DEBUG_STREAM: print every sample so the user can verify sensor accuracy.
+  Serial.printf("DBG t=%lu raw=%.1f med=%.1f lv=%s\n", (unsigned long)now, cm, dist, level_name(lv));
+
+  // Confirm a new level only after LEVEL_CONFIRM_N consecutive samples,
+  // so single-frame RCWL-1605 dropouts don't flip the outputs.
+  if (lv == last) {
+    s_pending_level = lv;
+    s_pending_count = 0;
+  } else if (lv == s_pending_level) {
+    if (s_pending_count < LEVEL_CONFIRM_N) s_pending_count++;
+    if (s_pending_count >= LEVEL_CONFIRM_N) {
+      last = lv;
+      s_pending_count = 0;
+      Serial.printf("dist=%.1fcm level=%s\n", dist, level_name(lv));
+      speech_trigger(lv, false);
+    }
+  } else {
+    s_pending_level = lv;
+    s_pending_count = 1;
   }
-  motor_update(now, lv);
+  motor_update(now, last);
 }
