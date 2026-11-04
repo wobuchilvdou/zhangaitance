@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # zhangaitance — ESP32-S3 Blind Assist
 
 一个面向小腿穿戴的辅助设备工程：本地完成超声波测距、危险分级、语音提示和振动提醒，后续扩展云端 AI 识别与紧急求助。
@@ -39,6 +38,3 @@ python scripts/run_tests.py
 ```
 
 当前 5 项模拟测试已通过，覆盖四个距离等级和非法输入。
-=======
-# zhangaitance
->>>>>>> origin/main
